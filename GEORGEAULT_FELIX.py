@@ -8,48 +8,55 @@ BOMB_FILE = "bombes.txt"
 
 ### Print functions
 
-def	print_round_informations(round_number, spots_to_discover):
+def	print_round_informations(round_number, spots_to_discover, difficulty):
 	print("\n-- Round ", round_number, " --", sep="")
 	print("--> You still have ", spots_to_discover, " spots to discover\n", sep="")
+	if difficulty == 2 and round_number != 1:
+		print("!!! Bombs have been swapped !!!\n")
 
 def	print_welcome_message():
-	print("###")
+	print("---")
 	print("Welcome to Felix's minesweeper game")
 	print("Find all hidden spots without landing on bombs, good luck !")
-	print("###\n")
+	print("---\n")
 
 def	print_number_bombs(difficulty, grid_size, bomb_spots):
 	nbr_bombs = (grid_size ** 2) // 5
 	if difficulty == 0:
-		print("You are playing in easy mode, there are/is", len(bomb_spots), "bomb(s).\n")
+		difficulty_str = "easy"
+		nbr_bombs = len(bomb_spots)
 	elif difficulty == 1:
-		print("You are playing in normal mode, there are/is", nbr_bombs, "bomb(s).\n")
+		difficulty_str = "normal"
 	else:
-		print("You are playing in hard mode, there are/is", nbr_bombs, "bomb(s).\n")
+		difficulty_str = "hard"
+	print("You are playing in", difficulty_str, "mode, there is/are", nbr_bombs, "hidden bomb(s).\n")
 
 def	print_first_row(size):
 	print(" " * 3, end="")
 	for i in range(size):
-		print(" " * 2, i + 1, " ", sep="", end="")
+		if i + 1 < 10:
+			print(" " * 3, i + 1, " " * 2, sep="", end="")
+		else:
+			print(" " * 3, i + 1, " ", sep="", end="")
 	print(" ", end="")
 
 def	print_row_separator(size):
 	print()
 	print(" " * 3, end="")
 	for i in range(size):
-		print("-" * 4, end="")
+		print("-" * 6, end="")
 	print("-")
 
 def	print_row(size, letter, empty_spots):
 	print(" ", chr(letter), " ", sep="", end="")
 	for i in range(size):
-		print("| ", end="")
+		print("|  ", end="")
 		tmp_coord = (letter - ord('A'), i)
 		if tmp_coord in empty_spots:
 			print(empty_spots[tmp_coord], end="")
 		else:
 			print("*", end="")
-		print(" ", end="")
+		print("  ", end="")
 	print("|", end="")
 
 def	print_grid(size, empty_spots):
@@ -61,9 +68,15 @@ def	print_grid(size, empty_spots):
 
 def	print_endgame_message(is_dead):
 	if is_dead:
-		print("BOOM !")
+		print("BOOM BADABOOM ! Maybe you'll have more luck next time...")
 	else:
-		print("Well done you finished the game !")
+		if difficulty == 0:
+			difficulty_str = "easy"
+		elif difficulty == 1:
+			difficulty_str = "normal"
+		else:
+			difficulty_str = "hard"
+		print("Well done, you beat the game in", difficulty_str, "difficulty! You can start the game again and maybe try another difficulty")
 
 ### Boolean functions (useful to use in conditions)
 
@@ -123,30 +136,31 @@ def	regenerate_bomb_spots(bomb_spots, empty_spots, grid_size):
 			empty_spots[spot] = count_adjacent_bombs(spot, bomb_spots)
 		elif empty_spots[spot] != "*" and count_adjacent_bombs(spot, bomb_spots) == 0:
 			empty_spots[spot] == " "
-	print("Bombs have been swapped !\n")
 
 ### Functions that require player's input
 
 def	choose_difficulty():
 	difficuly_choice = -1
 	while difficuly_choice < 0 or difficuly_choice > 2:
-		print("To choose your difficulty, press 0 (easy), 1 (normal), 2 (hard): ", end="")
+		print("To choose your difficulty:\n\n- Enter 0 (easy)\n\n- Enter 1 (normal)\n\n- Enter 2 (hard)\n\nYour choice: ", end="")
 		difficuly_choice = int(input())
 	return difficuly_choice
 
 def	choose_grid_size():
-	print("Choose the size of the grid by entering a number: ", end="")
-	grid_size = int(input())
+	grid_size = 0
+	while grid_size < 1 or grid_size > 26:
+		print("\nChoose the grid's size by entering a number between 1 and 26: ", end="")
+		grid_size = int(input())
 	return grid_size
 
 def	choose_coordinates(size):
 	y = -1
 	while y < 1 or y > size:
-		print("Choose column (between 1 and ", size, "):", sep="", end="")
+		print("Choose column (between 1 and ", size, "): ", sep="", end="")
 		y = int(input())
 	x = -1
 	while x < ord('A') or x > ord('Z'):
-		print("Choose row (between A and ", chr(ord('A') + size - 1), "):", sep="", end="")
+		print("Choose row (between A and ", chr(ord('A') + size - 1), "): ", sep="", end="")
 		x = ord(input())
 	return x - ord('A'), y - 1
 
@@ -209,7 +223,7 @@ round_number = 1
 
 while is_dead == False and spots_to_discover > 0:
 	print_grid(grid_size, empty_spots)
-	print_round_informations(round_number, spots_to_discover)
+	print_round_informations(round_number, spots_to_discover, difficulty)
 	x, y = choose_coordinates(grid_size)
 	if (x, y) in bomb_spots:
 		is_dead = True
